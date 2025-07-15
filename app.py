@@ -24,7 +24,7 @@ def llama():
     return(render_template("deepseek.html"))
 
 @app.route("/deepseek_reply",methods=["GET","POST"])
-def llama_reply():
+def deepseek_reply():
     q = request.form.get("q")
     # load model
     client = Groq()

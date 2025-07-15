@@ -20,7 +20,7 @@ def main():
 
 
 @app.route("/deepseek",methods=["GET","POST"])
-def llama():
+def deepseek():
     return(render_template("deepseek.html"))
 
 @app.route("/deepseek_reply",methods=["GET","POST"])

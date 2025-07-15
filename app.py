@@ -37,7 +37,7 @@ def deepseek_reply():
             }
         ]
     )
-    return(render_template("deepseek_reply.html",r=completion.choices[0].message.content))
+    return(render_template("deepseek_reply.html",r=completion_ds.choices[0].message.content))
 
 
 @app.route("/llama",methods=["GET","POST"])

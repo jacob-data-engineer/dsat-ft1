@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request
 import joblib
 from groq import Groq
-
+import sqlite3
+import datetime
 import os
+
+
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
@@ -16,11 +19,19 @@ def index():
 def main():
     q = request.form.get("q")
     # db
+    conn = sqlite3.connect('user.db')
+    conn.execute('INSERT INTO user (name, timestamp) VALUES (?, ?)', (q, datetime.datetime.now()))
+    conn.commit()
+    conn.close()
     return(render_template("main.html"))
 
 @app.route("/llama",methods=["GET","POST"])
 def llama():
     return(render_template("llama.html"))
+
+@app.route("/sepia_hf",methods=["GET","POST"])
+def sepia_hf():
+    return(render_template("sepia_hf.html"))
 
 @app.route("/llama_reply",methods=["GET","POST"])
 def llama_reply():
@@ -75,7 +86,7 @@ import requests
 
 @app.route("/telegram",methods=["GET","POST"])
 def telegram():
-    domain_url = 'https://dsat-ft1.onrender.com'
+    domain_url = 'https://dsat-ft1-clone-0rtf.onrender.com'
     # The following line is used to delete the existing webhook URL for the Telegram bot
     delete_webhook_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/deleteWebhook"
     requests.post(delete_webhook_url, json={"url": domain_url, "drop_pending_updates": True})
@@ -91,7 +102,7 @@ def telegram():
 
 @app.route("/stop_telegram",methods=["GET","POST"])
 def stop_telegram():
-    domain_url = 'https://dsat-ft1.onrender.com'
+    domain_url = 'https://dsat-ft1-clone-0rtf.onrender.com'
     # The following line is used to delete the existing webhook URL for the Telegram bot
     delete_webhook_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/deleteWebhook"
     webhook_response = requests.post(delete_webhook_url, json={"url": domain_url, "drop_pending_updates": True})
@@ -133,6 +144,28 @@ def webhook():
         })
     return('ok', 200)
 
+@app.route("/user_log",methods=["GET","POST"])
+def user_log():
+    conn = sqlite3.connect('user.db')
+    c = conn.cursor()
+    c.execute('''select * from user''')
+    r=""
+    for row in c:
+      print(row)
+      r = r + str(row)
+    c.close()
+    conn.close()
+    return render_template("user_log.html", r=r)
+
+@app.route("/delete_log",methods=["GET","POST"])
+def delete_log():
+    conn = sqlite3.connect('user.db')
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM user')
+    conn.commit()
+    conn.close()
+    return render_template("delete_log.html", message="User log deleted successfully.")
+
+
 if __name__ == "__main__":
     app.run()
-
